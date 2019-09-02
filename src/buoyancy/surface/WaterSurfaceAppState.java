@@ -60,10 +60,10 @@ public class WaterSurfaceAppState extends AbstractAppState implements PhysicsTic
         this.rootNode = this.app.getRootNode();
         this.debug = true;
         this.debugNormals = false;
-        this.linesX = 32;
-        this.linesZ = 32;
-        this.scale = 4f;
         this.elapsedBouyancyTime = 0f;
+        this.linesX = 32; // num of waterPatch grid rows in x direction
+        this.linesZ = 32; // num of waterPatch grid columns in z direction
+        this.scale = 4f;  // scale of waterPatch cells in world units
         
         this.useGerstnerWaves = false;
         
@@ -71,36 +71,36 @@ public class WaterSurfaceAppState extends AbstractAppState implements PhysicsTic
     }
     
     private void init() {
-//        initAudio();
+          //System.out.println("Number of Wave Layers: "+ WaterSurfaceGenerator.getWaveLayers());
         
-        //System.out.println("Number of Wave Layers: "+ WaterSurfaceGenerator.getWaveLayers());
+        // register this appState as a physics listener
         bulletAppState.getPhysicsSpace().addTickListener(this);
         
-        /* Mesh */
+        // Mesh
         waterPatch = new WaterSurfacePatch( linesX, linesZ, scale);
         
-        /* Geometry */
+        // Geometry
         waterPatchGeom = new Geometry("Water Patch Geometry", waterPatch);
         
-        /* Materials */
+        // Materials
         Material wireFrameMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
           wireFrameMat.setColor("Color", new ColorRGBA(0.75f, 0.75f, 1f, 1f)); //ColorRGBA.White);
           wireFrameMat.getAdditionalRenderState().setWireframe(true);
           wireFrameMat.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
           
-        Material waterSurfaceMat = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
-          Texture waterSurfaceTexture = assetManager.loadTexture("Textures/WaterSurface/Water 0175b.jpg");
-          waterSurfaceTexture.setWrap(Texture.WrapMode.Repeat);
-          Texture waterSurfaceNormalMap = assetManager.loadTexture("Textures/WaterSurface/Water 0175bnormal.jpg");
-          waterSurfaceNormalMap.setWrap(Texture.WrapMode.Repeat);
-          waterSurfaceMat.setTexture("DiffuseMap", waterSurfaceTexture);
-          waterSurfaceMat.setTexture("NormalMap", waterSurfaceNormalMap);
-          waterSurfaceMat.setBoolean("UseMaterialColors",true);
-          waterSurfaceMat.setColor("Diffuse",new ColorRGBA(0.55f, 0.60f, 0.75f, 1f));
-          waterSurfaceMat.setColor("Ambient",ColorRGBA.White);
-          waterSurfaceMat.setColor("Specular",ColorRGBA.White);
-          waterSurfaceMat.setFloat("Shininess", 128f);  // [0,128]
-          waterSurfaceMat.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
+//        Material waterSurfaceMat = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
+//          Texture waterSurfaceTexture = assetManager.loadTexture("Textures/WaterSurface/Water 0175b.jpg");
+//          waterSurfaceTexture.setWrap(Texture.WrapMode.Repeat);
+//          Texture waterSurfaceNormalMap = assetManager.loadTexture("Textures/WaterSurface/Water 0175bnormal.jpg");
+//          waterSurfaceNormalMap.setWrap(Texture.WrapMode.Repeat);
+//          waterSurfaceMat.setTexture("DiffuseMap", waterSurfaceTexture);
+//          waterSurfaceMat.setTexture("NormalMap", waterSurfaceNormalMap);
+//          waterSurfaceMat.setBoolean("UseMaterialColors",true);
+//          waterSurfaceMat.setColor("Diffuse",new ColorRGBA(0.55f, 0.60f, 0.75f, 1f));
+//          waterSurfaceMat.setColor("Ambient",ColorRGBA.White);
+//          waterSurfaceMat.setColor("Specular",ColorRGBA.White);
+//          waterSurfaceMat.setFloat("Shininess", 128f);  // [0,128]
+//          waterSurfaceMat.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
           
         Material waterSurfaceWhiteMat = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
           waterSurfaceWhiteMat.setBoolean("UseMaterialColors",true);
@@ -117,10 +117,10 @@ public class WaterSurfaceAppState extends AbstractAppState implements PhysicsTic
           //debugWaterSurfaceMat.setTexture("ColorMap", assetManager.loadTexture(new TextureKey("Interface/Logo/Monkey.jpg", true)));     
           debugWaterSurfaceMat.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
           
-        // showNormals is broken, only displays initial normals  
+        // showNormals Material is broken, only displays initial normals  
         Material showNormals = new Material(assetManager, "Common/MatDefs/Misc/ShowNormals.j3md");
         
-        //Material proceduralTextureMat; // TODO:
+        //Material proceduralTextureMat; // TODO
         
         waterPatchGeom.setMaterial(this.debug == true ? wireFrameMat : waterSurfaceWhiteMat);
         //waterPatchGeom.setMaterial( showNormals ); // not updated with mesh changes
@@ -129,11 +129,12 @@ public class WaterSurfaceAppState extends AbstractAppState implements PhysicsTic
         waterPatch.scaleTextureCoordinates(new Vector2f(4f, 4f));
         //waterPatchGeom.setCullHint(Spatial.CullHint.Always); // to make water invisible
         
-        /* Node */
+        // Node
         waterPatchNode = new Node("Water Patch Node");
         waterPatchNode.attachChild(waterPatchGeom);
         
         if(debugNormals) {
+            //dTangentBinormalGenerator.generate(waterPatch);
             //normalArrows = TangentBinormalGenerator.genNormalLines(waterPatch, 0.25f);
             normalArrows = TangentBinormalGenerator.genTbnLines(waterPatch, 0.25f);
             
@@ -156,6 +157,7 @@ public class WaterSurfaceAppState extends AbstractAppState implements PhysicsTic
         
         rootNode.attachChild(waterPatchNode);
         isActive = true;
+//        initAudio();
     }
     
     public SimpleApplication getApp() {
@@ -175,28 +177,25 @@ public class WaterSurfaceAppState extends AbstractAppState implements PhysicsTic
     }
     
     private void initAudio() {
-        /* nature sound - keeps playing in a loop. */
+        // ocean sound - keeps playing in a loop
         audioNode = new AudioNode(assetManager, "Sound/Environment/Ocean Waves.ogg", DataType.Stream);
-        audioNode.setLooping(true);  // activate continuous playing
+        audioNode.setLooping(true);
         audioNode.setPositional(true);
         audioNode.setVolume(3);
         rootNode.attachChild(audioNode);
-        audioNode.play(); // play continuously!
+        audioNode.play();
     }
     
     @Override
     public void update(float tpf) {
+        // move audio listener with cam
 //        app.getListener().setLocation(app.getCamera().getLocation());
-        
-        /* Moved to prePhysicsTick() to align to physics timing */        
-//        waterPatch.updateHeight(elapsedBouyancyTime += tpf, waterPatchGeom);
         
         if(debugNormals) {
             normalArrowsGeom.setMesh(
                     //TangentBinormalGenerator.genNormalLines(waterPatch, 0.25f));
                     TangentBinormalGenerator.genTbnLines(waterPatch, 0.25f));
         }
-        
     }
     
     @Override
@@ -204,9 +203,6 @@ public class WaterSurfaceAppState extends AbstractAppState implements PhysicsTic
         super.cleanup();
         //bulletAppState.getPhysicsSpace().removeAll(waterPatchNode); // already gone?
         waterPatchNode.removeFromParent();
-        //TODO: clean up what you initialized in the initialize method,
-        //e.g. remove all spatials from rootNode
-        //this is called on the OpenGL thread after the AppState has been detached
     }
 
     @Override

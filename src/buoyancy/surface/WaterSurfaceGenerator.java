@@ -16,8 +16,7 @@ public class WaterSurfaceGenerator {
     private static boolean isChoppy = false;
     
     
-    private static WaveProperties[] waves = null;
-    // float wavelength, float amplitude, float speed, Vector2f direction-/-centerPosition
+    private static WaveProperties[] waves; // = null;
        
 //    static {
 //        addWave(new WaveProperties( 1000f, 0.0001f, 1f, new Vector2f(0.5f, 0.5f) ) );
@@ -52,7 +51,7 @@ public class WaterSurfaceGenerator {
 //        addWave(new WaveProperties(100f, 0.5f, 2f, Utils.randomDirection2d()));
 //    }
     
-//    // print out initial collection of wave properties
+    // print out initial collection of wave properties
 //    static {
 //        for(WaveProperties wave : waves) {
 //            System.out.println(wave.getWavelength()+", "+
@@ -67,9 +66,9 @@ public class WaterSurfaceGenerator {
         return waveLayers;
     }
     
-    // clears waveLayer count and re-initializes empty waves array
     public static void clearWaves() {
-        waves = new WaveProperties[0];
+        // clears waveLayer count and re-initializes empty waves array
+        waves = null; // = new WaveProperties[0];
         waveLayers = 0;
     }
    
@@ -80,7 +79,6 @@ public class WaterSurfaceGenerator {
         }else{
             waves = Arrays.copyOf(waves, waves.length +1);
             waves[waves.length -1] = waveProperties;
-            //waveLayers = waves.length;
             waveLayers++;
         }
     }
@@ -118,23 +116,31 @@ public class WaterSurfaceGenerator {
 
             W(x,z,t) = 2A * ((sin(D dot(x,z) * w + t * φ) + 1) /2)^(k)
         */
+        
         Vector2f samplePoint = new Vector2f(x, z);
         float netWaveHeight = 0f;
+        
+        float waveHeight;
+        float sin;
+        Vector2f direction;
+        float frequency;
+        float amplitude;
+        float phase;
+        boolean isCircular;
         for(int i =0; i <waveLayers; i++) {
-            Vector2f direction = waves[i].getDirection();
-            float frequency = waves[i].getFrequency();
-            float amplitude = waves[i].getAmplitude();
-            float phase = waves[i].getPhase();
-            boolean isCircular = waves[i].isIsCircular();
+            direction = waves[i].getDirection().clone();
+            frequency = waves[i].getFrequency();
+            amplitude = waves[i].getAmplitude();
+            phase = waves[i].getPhase();
+            isCircular = waves[i].isIsCircular();
             
             if(isCircular) {
-                direction = direction.subtract(samplePoint).normalize();
+                direction.subtractLocal(samplePoint).normalizeLocal();
             }else{
-                direction = direction.negate();
+                direction.negateLocal();
             }
             
-            float waveHeight;
-            float sin = FastMath.sin(direction.dot(samplePoint) * frequency + time * phase);
+            sin = FastMath.sin(direction.dot(samplePoint) * frequency + time * phase);
             if(isChoppy) {
                 waveHeight = amplitude * 2 * FastMath.pow((sin + 1) / 2, chop);
             }else{
@@ -163,34 +169,42 @@ public class WaterSurfaceGenerator {
         
          ∂/∂x(W(x,z,t)) = sum[ k * Di.x * wi * Ai * 
                             ((sin(Di dot(x,z) * wi + t * φi) + 1) /2)^(k-1) * 
-                            cos(Di dot(x,z) * wi + t * φi) ]
+                                cos(Di dot(x,z) * wi + t * φi) ]
          ∂/∂y(W(x,z,t)) = sum[ k * Di.y * wi * Ai * 
                             ((sin(Di dot(x,z) * wi + t * φi) + 1) /2)^(k-1) * 
-                            cos(Di dot(x,z) * wi + t * φi) ]
+                                cos(Di dot(x,z) * wi + t * φi) ]
         over all waves i
         */
         
         Vector2f samplePoint = new Vector2f(x, z);
         float normalX = 0f;
         float normalZ = 0f;
+        
+        float cos;
+        float sin;
+        Vector2f direction;
+        float frequency;
+        float amplitude;
+        float phase;
+        boolean isCircular;
         for(int i =0; i <waveLayers; i++) {
-            Vector2f direction = waves[i].getDirection();
-            float frequency = waves[i].getFrequency();
-            float amplitude = waves[i].getAmplitude();
-            float phase = waves[i].getPhase();
-            boolean isCircular = waves[i].isIsCircular();
+            direction = waves[i].getDirection().clone();
+            frequency = waves[i].getFrequency();
+            amplitude = waves[i].getAmplitude();
+            phase = waves[i].getPhase();
+            isCircular = waves[i].isIsCircular();
             
             if(isCircular) {
-                direction = direction.subtract(samplePoint).normalize();
+                direction.subtractLocal(samplePoint).normalizeLocal();
             }else{
-                direction = direction.negate();
+                direction.negateLocal();
             }
             
-            float cos = FastMath.cos(direction.dot(samplePoint) * frequency + phase * time);
+            cos = FastMath.cos(direction.dot(samplePoint) * frequency + phase * time);
             
             // calculate the partial derivatives for x and z to multiply with netWaveHeight
             if(isChoppy){
-                float sin = FastMath.sin(direction.dot(samplePoint) * frequency + time * phase); 
+                sin = FastMath.sin(direction.dot(samplePoint) * frequency + time * phase); 
                 normalX +=
                         chop *
                         frequency *
@@ -239,22 +253,31 @@ public class WaterSurfaceGenerator {
         */
         Vector2f samplePoint = new Vector2f(x, z);
         float tangentY = 0f;
+        
+        float trigSeed;
+        float sin;
+        float cos;
+        Vector2f direction;
+        float frequency;
+        float amplitude;
+        float phase;
+        boolean isCircular;
         for(int i =0; i <waveLayers; i++) {
-            Vector2f direction = waves[i].getDirection();
-            float frequency = waves[i].getFrequency();
-            float amplitude = waves[i].getAmplitude();
-            float phase = waves[i].getPhase();
-            boolean isCircular = waves[i].isIsCircular();
+            direction = waves[i].getDirection().clone();
+            frequency = waves[i].getFrequency();
+            amplitude = waves[i].getAmplitude();
+            phase = waves[i].getPhase();
+            isCircular = waves[i].isIsCircular();
             
             if(isCircular) {
-                direction = direction.subtract(samplePoint).normalize();
+                direction.subtractLocal(samplePoint).normalizeLocal();
             }else{
-                direction = direction.negate();
+                direction.negateLocal();
             }
             
-            float trigSeed = direction.dot(samplePoint) * frequency + phase * time;
-            float cos = FastMath.cos(trigSeed);
-            float sin = FastMath.sin(trigSeed);
+            trigSeed = direction.dot(samplePoint) * frequency + phase * time;
+            cos = FastMath.cos(trigSeed);
+            sin = FastMath.sin(trigSeed);
             
             // calculate the partial derivative w.r.t. z to multiply with netWaveHeight
             if(isChoppy) {
@@ -264,7 +287,7 @@ public class WaterSurfaceGenerator {
                 tangentY += frequency * direction.getY() * amplitude * cos;
             }
         }
-        return new Vector3f(0, tangentY, 1).normalizeLocal();
+        return new Vector3f(0f, tangentY, 1f).normalizeLocal();
     } 
     
     public static Vector3f getBinormalAt(float x, float z, float time) {
@@ -275,22 +298,30 @@ public class WaterSurfaceGenerator {
         Vector2f samplePoint = new Vector2f(x, z);
         float binormalY = 0f;
         
+        float trigSeed;
+        float cos;
+        float sin;
+        Vector2f direction;
+        float frequency;
+        float amplitude;
+        float phase;
+        boolean isCircular;
         for(int i =0; i <waveLayers; i++) {
-            Vector2f direction = waves[i].getDirection();
-            float frequency = waves[i].getFrequency();
-            float amplitude = waves[i].getAmplitude();
-            float phase = waves[i].getPhase();
-            boolean isCircular = waves[i].isIsCircular();
+            direction = waves[i].getDirection().clone();
+            frequency = waves[i].getFrequency();
+            amplitude = waves[i].getAmplitude();
+            phase = waves[i].getPhase();
+            isCircular = waves[i].isIsCircular();
             
             if(isCircular) {
-                direction = direction.subtract(samplePoint).normalize();
+                direction.subtractLocal(samplePoint).normalizeLocal();
             }else{
-                direction = direction.negate();
+                direction.negateLocal();
             }
             
-            float trigSeed = direction.dot(samplePoint) * frequency + phase * time;
-            float cos = FastMath.cos(trigSeed);
-            float sin = FastMath.sin(trigSeed);
+            trigSeed = direction.dot(samplePoint) * frequency + phase * time;
+            cos = FastMath.cos(trigSeed);
+            sin = FastMath.sin(trigSeed);
             
             // calculate the partial derivative w.r.t. x to multiply with netWaveHeight
             if(isChoppy) {
@@ -300,7 +331,7 @@ public class WaterSurfaceGenerator {
                 binormalY += frequency * direction.getX() * amplitude * cos;
             }
         }
-        return new Vector3f(1, binormalY, 0).normalizeLocal();
+        return new Vector3f(1f, binormalY, 0f).normalizeLocal();
     }
     
     
