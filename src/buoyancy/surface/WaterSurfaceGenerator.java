@@ -39,18 +39,12 @@ public class WaterSurfaceGenerator {
 //        addWave(new WaveProperties( 100f, 0.5f, 2f, new Vector2f(0.89590293f, -0.4442499f) ));
 //    }
     
-//    static { // natural ?
-//        addWave(new WaveProperties( 10.700179f, 0.08987389f, 2.334795f, new Vector2f(0.89590293f, -0.4442499f) ));
-//    }
+    static { // natural ?
+        //addWave(new WaveProperties( 10.700179f, 0.08987389f, 2.334795f, new Vector2f(0.89590293f, -0.4442499f) ));
+        addWave(new WaveProperties( 10.700179f/2f, 0.08987389f, 2.334795f, new Vector2f(-0.89590293f, -0.4442499f) ));
+    }
     
-//    static {
-//        addWave(Utils.getRandomWaveConstrained(new Vector2f(0.7f, 0.3f).normalize()));
-//    }
-    
-//    static {
-//        addWave(new WaveProperties(100f, 0.5f, 2f, Utils.randomDirection2d()));
-//    }
-    
+
     // print out initial collection of wave properties
 //    static {
 //        for(WaveProperties wave : waves) {

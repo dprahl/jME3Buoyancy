@@ -63,7 +63,7 @@ public class WaterSurfaceAppState extends AbstractAppState implements PhysicsTic
         this.elapsedBouyancyTime = 0f;
         this.linesX = 32; // num of waterPatch grid rows in x direction
         this.linesZ = 32; // num of waterPatch grid columns in z direction
-        this.scale = 4f;  // scale of waterPatch cells in world units
+        this.scale = 0.5f;  // scale of waterPatch cells in world units
         
         this.useGerstnerWaves = false;
         

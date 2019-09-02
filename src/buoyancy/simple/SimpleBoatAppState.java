@@ -194,7 +194,7 @@ public class SimpleBoatAppState extends AbstractAppState {
 //        initialRotation = new Quaternion().fromAngleAxis(FastMath.QUARTER_PI, Vector3f.UNIT_Z);
         
         // debug starting translation
-        initialPosition = new Vector3f(12f, 2.75f, 10f);
+        initialPosition = new Vector3f(8f, 2.75f, 8f);
         
         initializeOrientation();
         
