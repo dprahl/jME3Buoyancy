@@ -36,12 +36,13 @@ public class WaveProperties {
          * @param direction the direction perpendicular to the wave front 
          *          and the direction of travel (will be normalized if isCircular is set to false)
          *          presumed to be in the horizontal plane of x and z
-         *          Vector2f.y will store the z component
+         *          Vector2f.y will store the z component 
+         *          - used as source position for circular waves if isCircular is set to true
          * @param isCircular true if wave is to be circular, false for directional
          */
         public WaveProperties(float wavelength, float amplitude, float speed, Vector2f direction, boolean isCircular) {
             this.wavelength = wavelength;
-            //this.frequency = 2/wavelength; // upgraded
+            //this.frequency = 2/wavelength; // upgraded below
             this.frequency = FastMath.sqrt(9.98f *(FastMath.TWO_PI/wavelength));
             this.amplitude = amplitude;
             this.speed = speed;
@@ -71,11 +72,12 @@ public class WaveProperties {
          *          and the direction of travel (will be normalized if isCircular is set false)
          *          presumed to be in the horizontal plane of x and z
          *          Vector2f.y will store the z component
+         *          - used as source position for circular waves if isCircular is set to true
          * @param isCircular true if wave is to be circular, false for directional
          */
         public void setProperties(float wavelength, float amplitude, float speed, Vector2f direction, boolean isCircular) {
             this.wavelength = wavelength;
-            //this.frequency = 2/wavelength; // upgraded
+            //this.frequency = 2/wavelength; // upgraded below
             this.frequency = FastMath.sqrt(9.98f *(FastMath.TWO_PI/wavelength));
             this.amplitude = amplitude;
             this.speed = speed;
@@ -99,7 +101,7 @@ public class WaveProperties {
         }
 
         /**
-         * @return the frequency of the wave
+         * @return the frequency of the wave, in crests per second
          */
         public float getFrequency() {
             return frequency;
@@ -108,7 +110,6 @@ public class WaveProperties {
         /**
          * @param frequency the frequency to assign to the wave,
          * internal debug use only
-         * frequency is initialized to be 2/wavelength
          */
         @Deprecated
         private void setFrequency(float frequency) {
@@ -139,14 +140,14 @@ public class WaveProperties {
         }
 
         /**
-         * @param speed the speed to set
+         * @param speed the wave speed to set
          */
         public void setSpeed(float speed) {
             this.speed = speed;
         }
 
         /**
-         * @return the phase
+         * @return the phase, which is wave speed * frequency
          */
         public float getPhase() {
             return phase;
@@ -181,18 +182,21 @@ public class WaveProperties {
         }
         
         /**
-         * @return the 2d center point of
-         * the source of the circular wave
+         * @return the 2d center point of the source
+         *  of the circular wave, relative to origin.
          * presumed to be in the horizontal plane of x and z
          *   Vector2f.getY() will return the z component
          */
         public Vector2f getCenter() {
+             if(!isCircular){
+                 return new Vector2f(0f,0f);
+             }
             return direction;
         }
         
         /**
-         * @param center the 2d center location of
-         * the source of the circular wave
+         * @param center the 2d center location of the source
+         *  of the circular wave, relative to origin
          * presumed to be in the horizontal plane of x and z
          *   Vector2f.y will store the z component
          */
@@ -208,7 +212,7 @@ public class WaveProperties {
         }
         
         /**
-         * @param isCircular true if wave is to be circular
+         * @param isCircular set to true if wave is to be circular
          *  use {@link #setCenter(Vector2f) setCenter} to ensure position is not normalized
          */
         public void setIsCircular(boolean isCircular) {

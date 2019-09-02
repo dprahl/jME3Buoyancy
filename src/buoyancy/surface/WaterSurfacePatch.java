@@ -42,7 +42,6 @@ public class WaterSurfacePatch extends Mesh {
         this.pointsX = pointsX;
         this.pointsZ = pointsZ;
         this.scale = scale;
-        //this.isSmooth = true;
         this.localToWorld = new Matrix4f();
         this.tempWorldLoc = new Vector3f();
         
@@ -108,7 +107,7 @@ public class WaterSurfacePatch extends Mesh {
         this.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(texCoords));
         this.setBuffer(Type.Index, 1, BufferUtils.createIntBuffer(indices));
         
-        //this.setDynamic();// unnecessary -not adding or removing vertices
+        //this.setDynamic();// unnecessary, not adding or removing vertices
         this.updateBound();
     }
     
@@ -377,10 +376,12 @@ public class WaterSurfacePatch extends Mesh {
     public void updateHeights(float elapsedTime, Geometry geom) {
         // set localToWorld matrix representing geom world transform for this frame
         geom.getLocalToWorldMatrix(localToWorld);
+        
         for(int z=0; z <pointsZ; z++) {
             for(int x=0; x <pointsX; x++) {
                 // set tempWorldLoc to current vertex transformed into world coordinates
                 localToWorld.mult(vertices[z * pointsX + x], tempWorldLoc);
+                
                 vertices[z * pointsX + x].setY(WaterSurfaceGenerator.
                         getHeightAt(x*scale, z*scale, elapsedTime));
                 normals[z * pointsX + x] = WaterSurfaceGenerator.
