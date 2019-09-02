@@ -1,4 +1,4 @@
-package bouyancy.debug;
+package buoyancy.debug;
 
 import com.jme3.math.Triangle;
 import com.jme3.math.Vector2f;

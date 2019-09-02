@@ -1,6 +1,6 @@
-package bouyancy.surface;
+package buoyancy.surface;
 
-import bouyancy.debug.Utils;
+import buoyancy.debug.Utils;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;

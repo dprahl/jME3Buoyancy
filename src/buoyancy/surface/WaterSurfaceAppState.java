@@ -1,4 +1,4 @@
-package bouyancy.surface;
+package buoyancy.surface;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;

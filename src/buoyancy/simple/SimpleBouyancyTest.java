@@ -1,4 +1,4 @@
-package bouyancy.simple;
+package buoyancy.simple;
 
 
 import com.jme3.app.SimpleApplication;
@@ -7,8 +7,8 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.system.AppSettings;
-import bouyancy.surface.WaterSurfaceAppState;
-import bouyancy.debug.Utils;
+import buoyancy.surface.WaterSurfaceAppState;
+import buoyancy.debug.Utils;
 import com.jme3.math.Quaternion;
 
 /**

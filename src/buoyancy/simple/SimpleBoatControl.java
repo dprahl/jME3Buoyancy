@@ -1,9 +1,9 @@
-package bouyancy.simple;
+package buoyancy.simple;
 
-import bouyancy.debug.Utils;
-import bouyancy.surface.WaterSurfacePatch;
-import bouyancy.surface.WaterSurfaceAppState;
-import bouyancy.surface.WaterSurfaceGenerator;
+import buoyancy.debug.Utils;
+import buoyancy.surface.WaterSurfacePatch;
+import buoyancy.surface.WaterSurfaceAppState;
+import buoyancy.surface.WaterSurfaceGenerator;
 import com.jme3.app.SimpleApplication;
 import com.jme3.bounding.BoundingBox;
 import com.jme3.bullet.PhysicsSpace;

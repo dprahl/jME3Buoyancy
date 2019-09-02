@@ -1,4 +1,4 @@
-package bouyancy.simple;
+package buoyancy.simple;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -20,8 +20,8 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Sphere;
 import com.jme3.texture.Texture;
-import bouyancy.surface.WaterSurfaceAppState;
-import bouyancy.debug.*;
+import buoyancy.surface.WaterSurfaceAppState;
+import buoyancy.debug.*;
 import com.jme3.light.AmbientLight;
 import com.jme3.math.Quaternion;
 import com.jme3.scene.VertexBuffer;

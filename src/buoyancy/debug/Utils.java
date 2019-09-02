@@ -1,4 +1,4 @@
-package bouyancy.debug;
+package buoyancy.debug;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.light.DirectionalLight;
@@ -14,7 +14,7 @@ import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.mesh.IndexBuffer;
 import com.jme3.util.BufferUtils;
-import bouyancy.surface.WaveProperties;
+import buoyancy.surface.WaveProperties;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;

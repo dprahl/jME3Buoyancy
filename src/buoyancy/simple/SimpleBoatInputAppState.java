@@ -1,6 +1,6 @@
-package bouyancy.simple;
+package buoyancy.simple;
 
-import bouyancy.surface.WaterSurfaceAppState;
+import buoyancy.surface.WaterSurfaceAppState;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;

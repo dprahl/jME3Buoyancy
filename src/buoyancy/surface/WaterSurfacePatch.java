@@ -1,4 +1,4 @@
-package bouyancy.surface;
+package buoyancy.surface;
 
 import com.jme3.math.Matrix4f;
 import com.jme3.math.Vector2f;
