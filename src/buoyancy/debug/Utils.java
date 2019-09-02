@@ -5,7 +5,6 @@ import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
-import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
@@ -14,10 +13,7 @@ import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.mesh.IndexBuffer;
 import com.jme3.util.BufferUtils;
-import buoyancy.surface.WaveProperties;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.nio.ShortBuffer;
 
 /**
  *
@@ -61,53 +57,27 @@ public class Utils {
     
     public static DirectionalLight sunLight(Vector3f direction, ColorRGBA color) {
         DirectionalLight sun = new DirectionalLight();
-        sun.setDirection(new Vector3f(direction).normalizeLocal());
+        sun.setDirection(direction.normalize());
         sun.setColor(color);
         return sun;
     }
     
-    public static WaveProperties getRandomWave() {
-        float wavelength = 10 * (1f + FastMath.nextRandomFloat());
-        float amplitude = 0.1f * FastMath.nextRandomFloat();
-        float speed = 1.5f + FastMath.nextRandomFloat();
-        Vector2f direction = randomDirection2d();
-        return new WaveProperties(wavelength, amplitude, speed, direction);
-    }
-    
-//    public static WaveProperties getRandomCircularWave() {
-//        float wavelength = 10 * (1f + FastMath.nextRandomFloat());
-//        float amplitude = 0.1f * FastMath.nextRandomFloat();
-//        float speed = 1.5f + FastMath.nextRandomFloat();
-//        int range = 10;
-//        Vector2f center = new Vector2f(
-//                FastMath.nextRandomInt(-range, range), 
-//                FastMath.nextRandomInt(-range, range));
-//        return new WaveProperties(wavelength, amplitude, speed, center, true);
-//    }
-    
-    public static Vector2f randomDirection2d() {
-        float x = FastMath.nextRandomFloat() * 2 - 1;
-        float y = FastMath.nextRandomFloat() * 2 - 1;
-        return new Vector2f(x, y).normalizeLocal();
-    }
-    
-    public static WaveProperties getRandomWaveConstrained(Vector2f windDir) {
-        float wavelength = 10f + FastMath.nextRandomFloat();
-        float amplitude = 0.1f * FastMath.nextRandomFloat();
-        float speed = 1.5f + FastMath.nextRandomFloat();
-        Vector2f direction = randomDirectionConstrained(windDir);
-        return new WaveProperties(wavelength, amplitude, speed, direction);
-    }
-    
-    public static Vector2f randomDirectionConstrained(Vector2f medianDir) {
-        float x = medianDir.getX();
-        float y = medianDir.getY();
-        x += FastMath.nextRandomInt(-1000, 1000)* 0.001f;
-        y += FastMath.nextRandomInt(-1000, 1000)* 0.001f;
-        return new Vector2f(x, y);
+    public static float clamp(float x, float min, float max){
+        if( x > max){
+            x = max;
+        }else if(x < min){
+            x = min;
+        }
+        return x;
     }
     
     public static Vector3f clampVelocity(Vector3f velocity, float maxSpeed) {
+        //if(velocity.lengthSquared() > maxSpeed*maxSpeed) {
+        //    return velocity.normalizeLocal().multLocal(maxSpeed);
+        //}else{
+        //    return velocity;
+        //}
+        
         float currentSpeed = velocity.length();
         if(currentSpeed > maxSpeed) {
            velocity.multLocal(maxSpeed/currentSpeed);
@@ -127,10 +97,14 @@ public class Utils {
     public static float mapToRange( float min, float max, 
                                     float newMin, float newMax, 
                                     float value) {
-        float result = newMin + ((newMax - newMin) / (max - min)) * (value - min);
-//        if(Float.isNaN(result)){
-//            return newMin;
-//        }
+        //float result = newMin + ((newMax - newMin) / (max - min)) * (value - min);
+        float delta = max - min;
+        float newDelta = newMax - newMin;
+        float valueDelta = value - min;
+        float deltaRatio = newDelta / delta;
+        float valueRatio = deltaRatio * valueDelta;
+        float result = newMin + valueRatio;
+        
         return result;
     }
     
@@ -138,48 +112,6 @@ public class Utils {
     public static float travelMap(float distanceFactor) {
         return -1f + 3f * distanceFactor;
     }
-    
-    /*
-    @Deprecated
-    public Vector3f getCenterOfMass(Mesh mesh) {
-        FloatBuffer verticesBuff = mesh.getFloatBuffer(VertexBuffer.Type.Position);
-        Vector3f[] vertices = BufferUtils.getVector3Array(verticesBuff);
-        IndexBuffer indicesBuff = mesh.getIndexBuffer();
-        int[] indices = new int[indicesBuff.size()];
-        for(int i = 0; i < indices.length; i++) {
-            indices[i] = indicesBuff.get(i);
-        }
-        Vector3f center = new Vector3f(0,0,0);
-        for(int i = 0; i < indices.length; i +=3) {
-            Vector3f simplexCenter =    vertices[indices[i]].
-                                        add(vertices[indices[i+1]]).
-                                        add(vertices[indices[i+2]]).
-                                        divide(4f);
-            center.addLocal(simplexCenter);
-        }
-        center.divideLocal(indices.length / 3);
-        return center;
-    }
-    
-    @Deprecated
-    public Vector3f getCenterOfMassOffset(Mesh mesh) {
-        FloatBuffer verticesBuff = mesh.getFloatBuffer(VertexBuffer.Type.Position);
-        Vector3f[] vertices = BufferUtils.getVector3Array(verticesBuff);
-        IndexBuffer indicesBuff = mesh.getIndexBuffer();
-        Vector3f center = new Vector3f(0f,0f,0f);
-        int triangleCount = 0;
-        for(int i = 0; i < indicesBuff.size(); i +=3) {
-            Vector3f simplexCenter =    vertices[indicesBuff.get(i)].
-                                        add(vertices[indicesBuff.get(i+1)]).
-                                        add(vertices[indicesBuff.get(i+2)]).
-                                        divide(4f);
-            center.addLocal(simplexCenter);
-            triangleCount++;
-        }
-        center.divideLocal(triangleCount);
-        return center;
-    }
-    */
     
     public static Vector3f calculateCenterOfMass(Mesh mesh) {
         FloatBuffer vertBuff = mesh.getFloatBuffer(VertexBuffer.Type.Position);
@@ -225,26 +157,6 @@ public class Utils {
             mass += faceMass;
         }
         return mass * 2;
-    }
-    
-     @Deprecated
-    public static Vector3f getLocalCenterOfMass(Mesh mesh) {
-        FloatBuffer vertBuff = mesh.getFloatBuffer(VertexBuffer.Type.Position);
-        Vector3f[] vertices = BufferUtils.getVector3Array(vertBuff);
-        IndexBuffer indices = mesh.getIndexBuffer();
-        
-        Vector3f center = new Vector3f();
-        float volume = 0f;
-        for(int i=0; i<indices.size(); i+=3) {
-                Vector3f a = vertices[indices.get(i)];
-                Vector3f b = vertices[indices.get(i+1)];
-                Vector3f c = vertices[indices.get(i+2)];
-                float v = a.cross(b).dot(c) / 6f; // + or -
-                volume += v;
-                Vector3f geoCenter = a.add(b.add(c)).divide(4f).mult(v);
-                center.addLocal(geoCenter);
-        }
-        return center.divide(volume);
     }
     
     

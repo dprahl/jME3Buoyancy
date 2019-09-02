@@ -9,7 +9,6 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.system.AppSettings;
 import buoyancy.surface.WaterSurfaceAppState;
 import buoyancy.debug.Utils;
-import com.jme3.math.Quaternion;
 
 /**
  * 
@@ -37,25 +36,27 @@ public class SimpleBouyancyTest extends SimpleApplication {
         rootNode.addLight(Utils.sunLight(new Vector3f(-1f, -1f, 1f)));
         rootNode.addLight(Utils.sunLight(new Vector3f(0.25f, 0.25f, 0.25f), ColorRGBA.DarkGray));
         
+        // adjust view and camera controls and face toward the world x direction
         viewPort.setBackgroundColor(ColorRGBA.DarkGray);
         flyCam.setMoveSpeed(15f);
         flyCam.setDragToRotate(false);
         cam.lookAtDirection(Vector3f.UNIT_X, Vector3f.UNIT_Y);
 
 
+        // create and attach bullet physics appState
         bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
         //bulletAppState.setDebugEnabled(true);
         
-        /* add Water Surface */
+        // add Water Surface 
         WaterSurfaceAppState fluidState = new WaterSurfaceAppState();
         stateManager.attach(fluidState);
         
-        /* add Water Craft (after Water Surface) */
+        // add Water Craft (requires a Water Surface) 
         SimpleBoatAppState boatState = new SimpleBoatAppState();
         stateManager.attach(boatState);
         
-        /* add Input Controls */
+        // add Input Controls 
         SimpleBoatInputAppState inputState = new SimpleBoatInputAppState();
         stateManager.attach(inputState);
         
