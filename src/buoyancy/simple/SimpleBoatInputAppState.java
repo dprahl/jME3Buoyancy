@@ -20,7 +20,8 @@ import com.jme3.input.controls.MouseButtonTrigger;
  * @author User
  */
 public class SimpleBoatInputAppState extends AbstractAppState {
-    private SimpleApplication app;
+    //private SimpleApplication app;
+    //private AppStateManager stateManager;
     private InputManager inputManager;
     private SimpleBoatControl boatControl;
     private WaterSurfaceAppState waterState;
@@ -28,9 +29,8 @@ public class SimpleBoatInputAppState extends AbstractAppState {
     @Override
     public void initialize(AppStateManager stateManager, Application app) {
         super.initialize(stateManager, app);
-        //TODO: initialize your AppState, e.g. attach spatials to rootNode
-        //this is called on the OpenGL thread after the AppState has been attached
-        this.app = (SimpleApplication) app;
+        //this.app = (SimpleApplication) app;
+        //this.stateManager = stateManager;
         this.inputManager = app.getInputManager();
         this.boatControl = stateManager.getState(SimpleBoatAppState.class).getBoatControl();
         this.waterState = stateManager.getState(WaterSurfaceAppState.class);
@@ -53,8 +53,9 @@ public class SimpleBoatInputAppState extends AbstractAppState {
     private void setupKeyInputs() {
         // Disable Default Mappings
         inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_MEMORY);
+        //inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_CAMERA_POS);
         
-//        KeyTrigger myKeyTrigger = new KeyTrigger(KeyInput.KEY_SPACE);
+//        KeyTrigger myKeyTrigger = new KeyTrigger(KeyInput.KEY_RETURN);
 //        MouseButtonTrigger myMouseButtonTrigger = new MouseButtonTrigger(MouseInput.BUTTON_LEFT);
 //        MouseAxisTrigger myMouseAxisTrigger = new MouseAxisTrigger(MouseInput.AXIS_WHEEL, false);    
 
@@ -70,7 +71,7 @@ public class SimpleBoatInputAppState extends AbstractAppState {
         MouseButtonTrigger leftMouseButton = new MouseButtonTrigger(MouseInput.BUTTON_LEFT);
         MouseButtonTrigger middleMouseButton = new MouseButtonTrigger(MouseInput.BUTTON_MIDDLE);
         MouseButtonTrigger rightMouseButton = new MouseButtonTrigger(MouseInput.BUTTON_RIGHT);
-        MouseAxisTrigger mouseWheel = new MouseAxisTrigger(MouseInput.AXIS_WHEEL, true);
+//        MouseAxisTrigger mouseWheel = new MouseAxisTrigger(MouseInput.AXIS_WHEEL, true);
         
         // Add Mappings
         inputManager.addMapping("Pause Game", pauseTrigger);
@@ -83,7 +84,7 @@ public class SimpleBoatInputAppState extends AbstractAppState {
         inputManager.addMapping("Primary Action", leftMouseButton, spaceBar);
         inputManager.addMapping("Secondary Action", rightMouseButton);
         inputManager.addMapping("Tertiary Action", middleMouseButton);
-        inputManager.addMapping("Mouse Wheel", mouseWheel);
+//        inputManager.addMapping("Mouse Wheel", mouseWheel);
         
         // Add Listeners for the Mappings
         inputManager.addListener(actionListener, new String[]{  "Pause Game", 
@@ -99,7 +100,7 @@ public class SimpleBoatInputAppState extends AbstractAppState {
         inputManager.addListener(actionListener, new String[]{  "Primary Action",
                                                                 "Secondary Action",
                                                                 "Tertiary Action"});
-        inputManager.addListener(analogListener, "Mouse Wheel");
+//        inputManager.addListener(analogListener, "Mouse Wheel");
         
 //        // Test Multiple mappings per listener (array of Strings)
 //        inputManager.addListener(analogListener, new String[]{"Left", "Right"});
@@ -111,15 +112,10 @@ public class SimpleBoatInputAppState extends AbstractAppState {
     private final ActionListener actionListener = new ActionListener() { 
         @Override
         public void onAction(String name, boolean keyPressed, float tpf) { 
-//            if (name.equals("Pause Game") && !keyPressed) { // test?
-//                isRunning = !isRunning;                    // action!
-//            }
             if (name.equals("Pause Game") && !keyPressed) {
                 waterState.setActive(!waterState.isActive());
                 boatControl.setActive(!boatControl.isActive());
-                
             }
-
             if (name.equals("Debug Mode") && !keyPressed) {
                 // toggle debug mode
             }
@@ -150,7 +146,7 @@ public class SimpleBoatInputAppState extends AbstractAppState {
 //            if (name.equals("Rotate")) {           // test?
 //                player.rotate(0, value*speed, 0); // action!
 //            }
-            System.out.println(name + " = " + value);
+            System.out.println(name + " (Analog) = " + value);
         }
     };
     
