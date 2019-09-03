@@ -17,6 +17,7 @@ public class WaterSurfaceGenerator {
     
     
     private static WaveProperties[] waves; // = null;
+    // parameters: wavelength, amplitude, speed, direction
        
 //    static {
 //        addWave(new WaveProperties( 1000f, 0.0001f, 1f, new Vector2f(0.5f, 0.5f) ) );
@@ -40,8 +41,7 @@ public class WaterSurfaceGenerator {
 //    }
     
     static { // natural ?
-        //addWave(new WaveProperties( 10.700179f, 0.08987389f, 2.334795f, new Vector2f(0.89590293f, -0.4442499f) ));
-        addWave(new WaveProperties( 10.700179f/2f, 0.08987389f, 2.334795f, new Vector2f(-0.89590293f, -0.4442499f) ));
+        addWave(new WaveProperties( 10.700179f, 0.08987389f, 2.334795f, new Vector2f(0.89590293f, 0.4442499f) ));
     }
     
 
@@ -329,49 +329,10 @@ public class WaterSurfaceGenerator {
     }
     
     
-    
-//    private static float medianWavelength;
-//     private static float halfMedianWavelength;
-//     private static float doubleMedianWavelength;
-//     private static float medianWavelengthOffset;
-//    private static float waveFrequency;
-//    private static float medianAmplitude;
-//    private static Vector2f windDirection;
-//    private static float maxAngleOffsetDegrees;
     private static float steepness = 0.9f; // 0.0 to 1.0
     
-    public static Vector3f getGerstnerPositionAt(float x, float z, float time) {
-        if(null == waves || waveLayers < 1) {
-            return new Vector3f(x, 0f, z);
-        }
-        
-        float X = 0f;
-        float Y = 0f;
-        float Z = 0f; 
-        Vector2f P = new Vector2f(x, z);
-        
-        for(int i=0; i <waveLayers; i++){
-            Vector2f waveDirection = waves[i].getDirection();
-            float waveX = waveDirection.getX();
-            float waveZ = waveDirection.getY();
-            float amplitude = waves[i].getAmplitude();
-            float frequency = waves[i].getFrequency();
-            float phaseT = waves[i].getPhase() * time;
-            float dot = waveDirection.dot(P);
-            float cos = FastMath.cos(frequency * dot + phaseT);
-            float sin = FastMath.sin(frequency * dot + phaseT);
-            //steepness = 0f; // 1f/(frequency * amplitude);
-            float steepnessLocal = steepness / (frequency * amplitude * waveLayers);
-            
-            X += steepnessLocal * amplitude * waveX * cos;
-            Y += amplitude * sin;
-            Z += steepnessLocal * amplitude * waveZ * cos;
-        }
-        return new Vector3f(X, Y, Z);
-    }
-    
     @Deprecated // broken
-    public static Vector3f getGerstnerPositionAt(float x, float z, float time, boolean deleteMe) {
+    public static Vector3f getGerstnerPosition(float x, float z, float time) {
         /*
         Q = steepness constant {0 to 1}
         P(x,y,t) = (x + sum[Qi * Ai * Di.x * cos(wi * Di dot(x,y) + φ^time)],
@@ -382,7 +343,7 @@ public class WaterSurfaceGenerator {
         float Y = 0f;
         float Z = z;
         for(int i=0; i <waveLayers; i++){
-            Vector2f waveDirection = waves[i].getDirection();
+            Vector2f waveDirection = waves[i].getDirection().negate();
             float waveX = waveDirection.getX();
             float waveZ = waveDirection.getY();
             float amplitude = waves[i].getAmplitude();
@@ -400,6 +361,35 @@ public class WaterSurfaceGenerator {
         return new Vector3f(X, Y, Z);
     }
 
+    public static Vector3f getGerstnerPositionAt(float x, float z, float time) {
+        if(null == waves || waveLayers < 1) {
+            return new Vector3f(x, 0f, z);
+        }
+        
+        float X = 0f;
+        float Y = 0f;
+        float Z = 0f; 
+        Vector2f P = new Vector2f(x, z);
+        
+        for(int i=0; i <waveLayers; i++){
+            Vector2f waveDirection = waves[i].getDirection().negate();
+            float waveX = waveDirection.getX();
+            float waveZ = waveDirection.getY();
+            float amplitude = waves[i].getAmplitude();
+            float frequency = waves[i].getFrequency();
+            float phaseT = waves[i].getPhase() * time;
+            float dot = waveDirection.dot(P);
+            float cos = FastMath.cos(frequency * dot + phaseT);
+            float sin = FastMath.sin(frequency * dot + phaseT);
+            float steepnessLocal = steepness / (frequency * amplitude * waveLayers);
+            
+            X += steepnessLocal * amplitude * waveX * cos;
+            Y += amplitude * sin;
+            Z += steepnessLocal * amplitude * waveZ * cos;
+        }
+        return new Vector3f(X, Y, Z);
+    }
+    
     public static Vector3f getGerstnerNormalAt(float x, float z, float time) {
         if(null == waves || waveLayers < 1) {
             return new Vector3f(0f, 1f, 0f);
@@ -412,7 +402,7 @@ public class WaterSurfaceGenerator {
         // C() = cos(wi * Di dot(P) + φ * time)
         // S() = sin(wi * Di dot(P) + φ * time)
         for(int i =0; i <waveLayers; i++) {
-            Vector2f waveDirection = waves[i].getDirection();
+            Vector2f waveDirection = waves[i].getDirection().negate();
             float waveX = waveDirection.getX();
             float waveZ = waveDirection.getY();
             float amplitude = waves[i].getAmplitude();
@@ -445,7 +435,7 @@ public class WaterSurfaceGenerator {
         // C() = cos(wi * Di dot(P) + φ * time)
         // S() = sin(wi * Di dot(P) + φ * time)
         for(int i =0; i <waveLayers; i++) {
-            Vector2f waveDirection = waves[i].getDirection();
+            Vector2f waveDirection = waves[i].getDirection().negate();
             float waveX = waveDirection.getX();
             float waveZ = waveDirection.getY();
             float amplitude = waves[i].getAmplitude();
@@ -478,7 +468,7 @@ public class WaterSurfaceGenerator {
         // C() = cos(wi * Di dot(P) + φ * time)
         // S() = sin(wi * Di dot(P) + φ * time)
         for(int i =0; i <waveLayers; i++) {
-            Vector2f waveDirection = waves[i].getDirection();
+            Vector2f waveDirection = waves[i].getDirection().negate();
             float waveX = waveDirection.getX();
             float waveZ = waveDirection.getY();
             float amplitude = waves[i].getAmplitude();

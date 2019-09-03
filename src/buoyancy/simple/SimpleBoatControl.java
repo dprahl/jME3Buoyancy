@@ -68,6 +68,8 @@ public class SimpleBoatControl extends AbstractControl implements PhysicsTickLis
     private Mesh forceVectorMesh;
     private Geometry submergedTriangleVelocityGeom;
     private Mesh submergedTriangleVelocityMesh;
+    private Geometry principalTriangleVelocityGeom;
+    private Mesh principalTriangleVelocityMesh;
     private Geometry resistanceForceVectorGeom;
     private Mesh resistanceForceVectorMesh;
     private Geometry slammingForceVectorGeom;
@@ -92,6 +94,7 @@ public class SimpleBoatControl extends AbstractControl implements PhysicsTickLis
     private final ArrayList<Vector3f> bouyancyForcePointVertices;
     private final ArrayList<Vector3f> bouyancyForceVectorVertices;
     private final ArrayList<Vector3f> submergedTriangleVelocityVertices;
+    private final ArrayList<Vector3f> principalTriangleVelocityVertices;
     private final ArrayList<Vector3f> resistanceForceVectorVertices;
     private final ArrayList<Vector3f> slammingForceVectorVertices;
     private Vector3f worldPoint;
@@ -187,7 +190,7 @@ public class SimpleBoatControl extends AbstractControl implements PhysicsTickLis
     private Vector3f GAMMAVector;   
     
     // experimental: to compensate for a 0.0000001f dampening jitter in bullet
-    private final float jitterCorrection = 0.9999999f;
+    //private final float jitterCorrection = 0.9999999f;
     
     private boolean movingForward;
     private boolean turningLeft;
@@ -252,6 +255,7 @@ public class SimpleBoatControl extends AbstractControl implements PhysicsTickLis
         // setup vertex ArrayLists for forces applied 
         bouyancyForceVectorVertices = new ArrayList<>();
         submergedTriangleVelocityVertices = new ArrayList<>();
+        principalTriangleVelocityVertices = new ArrayList<>();
         resistanceForceVectorVertices = new ArrayList<>();
         slammingForceVectorVertices = new ArrayList<>();
 
@@ -333,8 +337,11 @@ public class SimpleBoatControl extends AbstractControl implements PhysicsTickLis
         // setup debug Line Mesh of current bouyancy force vectors
         initDebugBouyancyForceVectorMesh();
         
-        // setup debug Line Mesh of current Triangle velocity vectors
+        // setup debug Line Mesh of current submerged Triangle velocity vectors
         initDebugSubmergedTriangleVelocityMesh();
+        
+        // setup debug Line Mesh of current principal Triangle velocity vectors
+        initDebugPrincipalTriangleVelocityMesh();
         
         // setup debug Line Mesh of current resistance force vectors
         initDebugResistanceForceVectorMesh();
@@ -417,6 +424,7 @@ public class SimpleBoatControl extends AbstractControl implements PhysicsTickLis
         bouyancyForcePointVertices.clear();
         bouyancyForceVectorVertices.clear();
         submergedTriangleVelocityVertices.clear();
+        principalTriangleVelocityVertices.clear();
         resistanceForceVectorVertices.clear();
         slammingForceVectorVertices.clear();
         //String windingOrder = null;
@@ -444,6 +452,7 @@ public class SimpleBoatControl extends AbstractControl implements PhysicsTickLis
             //updateDebugForcePointMesh();
             //updateDebugBouyancyForceVectorMesh();
             //updateDebugSubmergedTriangleVelocityMesh();
+            updateDebugPrincipalTriangleVelocityMesh();
             updateDebugResistanceForceVectorMesh();
             updateDebugSlammingForceVectorMesh();
         }
@@ -867,7 +876,7 @@ public class SimpleBoatControl extends AbstractControl implements PhysicsTickLis
                   //System.out.println("Dragtype: Suction");
                 dragForceMagnitude =  ((suctionLinearDragCoefficient * triangleSpeedTerm) + 
                         (suctionQuadraticDragCoefficient * (triangleSpeedTerm * triangleSpeedTerm))) * 
-                        localTriangleArea * -FastMath.pow(-cosTHETAi, suctionFalloff);
+                        localTriangleArea * -FastMath.pow(-cosTHETAi, suctionFalloff); // double negatives?
 //                  System.out.println("((CSD_1:"+ suctionLinearDragCoefficient +" * v:"+ triangleSpeedTerm +") + (CSD_2:"+ suctionQuadraticDragCoefficient +" * (v:"+ triangleSpeedTerm +" * v:"+ triangleSpeedTerm +"))) * Area:"+ localTriangleArea +" * cosTheta["+ cosTHETAi +"]to the Fs["+ suctionFalloff +"]:"+ -FastMath.pow(-cosTHETAi, suctionFalloff));
                   //System.out.println("suctionLinearDragCoefficient: "+ suctionLinearDragCoefficient);
                   //System.out.println("suctionQuadraticDragCoefficient: "+ suctionQuadraticDragCoefficient);
@@ -948,6 +957,10 @@ public class SimpleBoatControl extends AbstractControl implements PhysicsTickLis
                 //System.out.println("triangleVelocity: "+ triangleVelocity);
                 //System.out.println("triangleVelocityPrevious: "+ triangleVelocityPrevious);
 
+            // debug mesh - displays principal triangle velocity direction lines
+            Vector3f debugVelocityForceEnd = rigidBodyControl.getPhysicsRotation().inverse().mult(triangleVelocity).mult(0.33f).add(principalTriangleCenter);
+            principalTriangleVelocityVertices.add(debugVelocityForceEnd);
+            principalTriangleVelocityVertices.add(principalTriangleCenter);
             
             // calculate slamming force only on principal triangles with some area submerged 
             if(submergedTriangleArea > 0f) {
@@ -2117,6 +2130,36 @@ public class SimpleBoatControl extends AbstractControl implements PhysicsTickLis
         submergedTriangleVelocityMesh.setBuffer(VertexBuffer.Type.Position, 3, BufferUtils.createFloatBuffer(submergedTriangleVelocityVerticesArray));
         submergedTriangleVelocityMesh.updateCounts();
         submergedTriangleVelocityMesh.updateBound();
+    }
+    
+    private void initDebugPrincipalTriangleVelocityMesh() {
+        // debug Line Mesh showing the velocities of all submerged triangles
+        principalTriangleVelocityMesh = new Mesh();
+        principalTriangleVelocityMesh.setDynamic();
+        principalTriangleVelocityMesh.setMode(Mesh.Mode.Lines);
+        Material principalTriangleVelocityMatUnlit = new Material(waterSurfaceAppState.getApp().getAssetManager(),
+                                                "Common/MatDefs/Misc/Unshaded.j3md");
+        principalTriangleVelocityMatUnlit.setColor("Color", ColorRGBA.Pink);
+        principalTriangleVelocityMatUnlit.getAdditionalRenderState().setLineWidth(1f);
+        //principalTriangleVelocityMatUnlit.getAdditionalRenderState().setWireframe(true);
+        //principalTriangleVelocityMatUnlit.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+        
+        principalTriangleVelocityGeom = new Geometry("Principal Triangle Velocity Vector Geometry", principalTriangleVelocityMesh);
+        principalTriangleVelocityGeom.setMaterial(principalTriangleVelocityMatUnlit);
+        //principalTriangleVelocityGeom.setCullHint(Spatial.CullHint.Never);
+        
+        principalGeom.getParent().attachChild(principalTriangleVelocityGeom);
+    }
+    
+    private void updateDebugPrincipalTriangleVelocityMesh() {
+        // create position array
+        Vector3f[] principalTriangleVelocityVerticesArray = new Vector3f[0];
+        principalTriangleVelocityVerticesArray = principalTriangleVelocityVertices.toArray(principalTriangleVelocityVerticesArray);
+        
+        // set Mesh vertex positions and update Mesh
+        principalTriangleVelocityMesh.setBuffer(VertexBuffer.Type.Position, 3, BufferUtils.createFloatBuffer(principalTriangleVelocityVerticesArray));
+        principalTriangleVelocityMesh.updateCounts();
+        principalTriangleVelocityMesh.updateBound();
     }
     
     private void initDebugResistanceForceVectorMesh() {
